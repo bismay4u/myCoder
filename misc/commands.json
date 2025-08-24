@@ -28,6 +28,16 @@
                 "-S"
             ]
         },
+        "python-venv":
+        {
+            "extension": ".py",
+            "command": "venv/bin/python",
+            "timeout": 5000,
+            "args":
+            [
+                "-S"
+            ]
+        },
         "java":
         {
             "extension": ".java",
@@ -97,6 +107,25 @@
             }
         ],
         "python":
+        [
+            {
+                "name": "Hello World",
+                "code": "print(\"Hello, World!\")"
+            },
+            {
+                "name": "Function",
+                "code": "def greet(name):\n    return f\"Hello, {name}!\"\n\nprint(greet(\"World\"))"
+            },
+            {
+                "name": "Loop",
+                "code": "for i in range(1, 6):\n    print(f\"Count: {i}\")"
+            },
+            {
+                "name": "List",
+                "code": "numbers = [1, 2, 3, 4, 5]\ndoubled = [n * 2 for n in numbers]\nprint(doubled)"
+            }
+        ],
+        "python-venv":
         [
             {
                 "name": "Hello World",
