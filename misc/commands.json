@@ -1,0 +1,171 @@
+{
+    "LANGUAGES":
+    {
+        "bash":
+        {
+            "extension": ".sh",
+            "command": "bash",
+            "timeout": 5000
+        },
+        "javascript":
+        {
+            "extension": ".js",
+            "command": "node",
+            "timeout": 5000,
+            "args":
+            [
+                "--no-deprecation",
+                "--max-old-space-size=50"
+            ]
+        },
+        "python":
+        {
+            "extension": ".py",
+            "command": "python3",
+            "timeout": 5000,
+            "args":
+            [
+                "-S"
+            ]
+        },
+        "java":
+        {
+            "extension": ".java",
+            "command": "javac",
+            "compileFirst": true,
+            "runCommand": "java",
+            "timeout": 8000,
+            "compileArgs":
+            [
+                "-cp",
+                "."
+            ],
+            "runArgs":
+            [
+                "-cp",
+                "."
+            ]
+        },
+        "cpp":
+        {
+            "extension": ".cpp",
+            "command": "g++",
+            "compileFirst": true,
+            "runCommand": "./a.out",
+            "compileArgs":
+            [
+                "-o",
+                "a.out",
+                "-std=c++17"
+            ],
+            "timeout": 8000
+        },
+        "c":
+        {
+            "extension": ".c",
+            "command": "gcc",
+            "compileFirst": true,
+            "runCommand": "./a.out",
+            "compileArgs":
+            [
+                "-o",
+                "a.out",
+                "-std=c99"
+            ],
+            "timeout": 8000
+        }
+    },
+    "TEMPLATES":
+    {
+        "javascript":
+        [
+            {
+                "name": "Hello World",
+                "code": "console.log(\"Hello, World!\");"
+            },
+            {
+                "name": "Function",
+                "code": "function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet(\"World\"));"
+            },
+            {
+                "name": "Loop",
+                "code": "for (let i = 1; i <= 5; i++) {\n    console.log(`Count: ${i}`);\n}"
+            },
+            {
+                "name": "Array",
+                "code": "const numbers = [1, 2, 3, 4, 5];\nconst doubled = numbers.map(n => n * 2);\nconsole.log(doubled);"
+            }
+        ],
+        "python":
+        [
+            {
+                "name": "Hello World",
+                "code": "print(\"Hello, World!\")"
+            },
+            {
+                "name": "Function",
+                "code": "def greet(name):\n    return f\"Hello, {name}!\"\n\nprint(greet(\"World\"))"
+            },
+            {
+                "name": "Loop",
+                "code": "for i in range(1, 6):\n    print(f\"Count: {i}\")"
+            },
+            {
+                "name": "List",
+                "code": "numbers = [1, 2, 3, 4, 5]\ndoubled = [n * 2 for n in numbers]\nprint(doubled)"
+            }
+        ],
+        "java":
+        [
+            {
+                "name": "Hello World",
+                "code": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}"
+            },
+            {
+                "name": "Method",
+                "code": "public class Main {\n    public static String greet(String name) {\n        return \"Hello, \" + name + \"!\";\n    }\n    \n    public static void main(String[] args) {\n        System.out.println(greet(\"World\"));\n    }\n}"
+            },
+            {
+                "name": "Loop",
+                "code": "public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i <= 5; i++) {\n            System.out.println(\"Count: \" + i);\n        }\n    }\n}"
+            }
+        ],
+        "cpp":
+        [
+            {
+                "name": "Hello World",
+                "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, World!\" << endl;\n    return 0;\n}"
+            },
+            {
+                "name": "Function",
+                "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\nstring greet(string name) {\n    return \"Hello, \" + name + \"!\";\n}\n\nint main() {\n    cout << greet(\"World\") << endl;\n    return 0;\n}"
+            },
+            {
+                "name": "Loop",
+                "code": "#include <iostream>\nusing namespace std;\n\nint main() {\n    for (int i = 1; i <= 5; i++) {\n        cout << \"Count: \" << i << endl;\n    }\n    return 0;\n}"
+            }
+        ],
+        "c":
+        [
+            {
+                "name": "Hello World",
+                "code": "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}"
+            },
+            {
+                "name": "Function",
+                "code": "#include <stdio.h>\n\nvoid greet(char* name) {\n    printf(\"Hello, %s!\\n\", name);\n}\n\nint main() {\n    greet(\"World\");\n    return 0;\n}"
+            },
+            {
+                "name": "Loop",
+                "code": "#include <stdio.h>\n\nint main() {\n    for (int i = 1; i <= 5; i++) {\n        printf(\"Count: %d\\n\", i);\n    }\n    return 0;\n}"
+            }
+        ],
+        "bash":
+        [
+            {
+                "name": "Hello World",
+                "code": "echo \"Hello, World!\""
+            }
+        ]
+    }
+}

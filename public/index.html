@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark d-none">
+        <div class="container-fluid">
+            <span class="navbar-brand">🚀 Code Editor</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid main-container">
+        <div class="row h-100">
+            <!-- Editor Panel -->
+            <div class="col-md-6 p-0 editor-panel">
+                <div class="panel-header">
+                    <h6 class="panel-title">🚀 Code Editor</h6>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <select id="scriptSelector" class="language-selector">
+                        </select>    
+                        <select id="languageSelector" class="language-selector">
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="c">C</option>
+                        </select>
+                        <button id="runBtn" class="run-btn">
+                            <span class="run-text">Run</span>
+                            <span class="loading">Running...</span>
+                        </button>
+                        <button id="saveBtn" class="save-btn">
+                            <span class="save-text">Save</span>
+                            <span class="loading">Running...</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="boilerplate-section">
+                    <small class="text-muted1">Start with a boilerplate:</small>
+                    <div class="boilerplate-grid mt-2" id="boilerplateButtons">
+                        <!-- Boilerplate buttons will be added here -->
+                    </div>
+                </div>
+                
+                <div class="code-editor">
+                    <pre class="line-numbers" id="lineNumbers">1</pre>
+                    <textarea 
+                        id="codeEditor" 
+                        class="code-textarea" 
+                        placeholder="Write your code here..."
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Result Panel -->
+            <div class="col-md-6 p-0 result-panel">
+                <div class="panel-header">
+                    <h6 class="panel-title">Output</h6>
+                </div>
+                
+                <div class="input-section">
+                    <label class="form-label mb-1" style="font-size: 12px; color: #858585;">Input (optional):</label>
+                    <textarea 
+                        id="inputArea" 
+                        class="input-textarea" 
+                        placeholder="Enter input for your program..."
+                    ></textarea>
+                </div>
+                
+                <div class="output-container">
+                    <div id="outputArea" class="output-area">
+                        <div class="empty-state">
+                            <h5>Ready to Execute</h5>
+                            <p>Write your code and click "Run" to see the output</p>
+                            <div class="boilerplate-grid">
+                                <button class="boilerplate-btn" onclick="loadExample('hello world')">Hello World</button>
+                                <button class="boilerplate-btn" onclick="loadExample('loop')">Loop Example</button>
+                                <button class="boilerplate-btn" onclick="loadExample('function')">Function Example</button>
+                                <button class="boilerplate-btn" onclick="loadExample('array')">Array Example</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-bar">
+                    <span id="statusText">Ready</span>
+                    <span id="executionTime"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class CodeEditor {
+            constructor() {
+                this.LANGLIST = {}
+
+                this.editor = document.getElementById('codeEditor');
+                this.outputArea = document.getElementById('outputArea');
+                this.languageSelector = document.getElementById('languageSelector');
+                this.scriptSelector = document.getElementById('scriptSelector');
+                this.runBtn = document.getElementById('runBtn');
+                this.saveBtn = document.getElementById('saveBtn');
+                this.statusText = document.getElementById('statusText');
+                this.executionTime = document.getElementById('executionTime');
+                this.inputArea = document.getElementById('inputArea');
+                this.lineNumbers = document.getElementById('lineNumbers');
+                this.boilerplateButtons = document.getElementById('boilerplateButtons');
+                
+                this.initializeEventListeners();
+                this.loadLangList();
+
+                this.updateLineNumbers();
+                this.setupBoilerplates();
+                this.setupScripts();
+                this.loadDefaultCode();
+            }
+            
+            initializeEventListeners() {
+                this.runBtn.addEventListener('click', () => this.executeCode());
+                this.saveBtn.addEventListener('click', () => this.saveScriptCode());
+
+                this.languageSelector.addEventListener('change', () => {
+                    this.setupBoilerplates();
+                    this.setupScripts();
+                    this.loadDefaultCode();
+                });
+
+                this.scriptSelector.addEventListener('change', () => {
+                    this.loadScriptCode();
+                });
+                
+                this.editor.addEventListener('input', () => this.updateLineNumbers());
+                this.editor.addEventListener('scroll', () => this.syncLineNumbers());
+                this.editor.addEventListener('keydown', (e) => this.handleKeydown(e));
+            }
+            
+            handleKeydown(e) {
+                // Tab handling
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.editor.selectionStart;
+                    const end = this.editor.selectionEnd;
+                    const value = this.editor.value;
+                    
+                    this.editor.value = value.substring(0, start) + '    ' + value.substring(end);
+                    this.editor.selectionStart = this.editor.selectionEnd = start + 4;
+                }
+                
+                // Run code with Ctrl+Enter
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.executeCode();
+                } else if (e.metaKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.executeCode();
+                } else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    this.saveScriptCode();
+                } else if (e.metaKey && e.key === 's') {
+                    e.preventDefault();
+                    this.saveScriptCode();
+                }
+            }
+            
+            updateLineNumbers() {
+                const lines = this.editor.value.split('\n');
+                const lineCount = lines.length;
+                let numbers = '';
+                
+                for (let i = 1; i <= lineCount; i++) {
+                    numbers += i + '\n';
+                }
+                
+                this.lineNumbers.textContent = numbers;
+            }
+            
+            syncLineNumbers() {
+                this.lineNumbers.scrollTop = this.editor.scrollTop;
+            }
+            
+            async setupScripts() {
+                $("#scriptSelector").html("");
+                const language = this.languageSelector.value;
+
+                if(!language) return;
+
+                try {
+                    const response = await fetch('/api/scripts?'+ new URLSearchParams({
+                                language: language
+                            }).toString(), {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        $("#scriptSelector").html(`<option value=''>Select Script</option>`+
+                                result.scripts.map(a=>`<option value='${a}'>${a}</option>`));
+                    }
+                } catch (error) {
+                    this.statusText.textContent = 'Network error for Language List';
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            setupBoilerplates() {
+                const language = this.languageSelector.value;
+                const boilerplates = this.getBoilerplates(language);
+                
+                this.boilerplateButtons.innerHTML = '';
+                $("#outputArea .boilerplate-grid").html("");
+                boilerplates.forEach(template => {
+                    const btn = document.createElement('button');
+                    btn.className = 'boilerplate-btn';
+                    btn.textContent = template.name;
+                    btn.onclick = () => this.loadTemplate(template.code);
+                    this.boilerplateButtons.appendChild(btn);
+
+                    $("#outputArea .boilerplate-grid").append(`<button class="boilerplate-btn" onclick="loadExample('${template.name}}')">${template.name}</button>`);
+                });
+            }
+            
+            getExampleCode(keyword) {
+                if(keyword==null) return "";
+
+                const language = this.languageSelector.value;
+                const boilerplates = this.getBoilerplates(language);
+                const codeFound = boilerplates.filter(a=>a.name.toLowerCase()==keyword.toLowerCase());
+
+                if(codeFound.length>0) return codeFound[0].code;
+                else return "";
+            }
+
+            getBoilerplates(language) {
+                const templates = this.LANGLIST.templates;
+                
+                if(!templates) return [];
+
+                return templates[language] || [];
+            }
+            
+            loadTemplate(code) {
+                this.editor.value = code;
+                this.updateLineNumbers();
+                this.editor.focus();
+            }
+            
+            loadDefaultCode() {
+                const language = this.languageSelector.value;
+                const templates = this.getBoilerplates(language);
+                if (templates.length > 0) {
+                    this.loadTemplate(templates[0].code);
+                }
+            }
+
+            async saveScriptCode() {
+                const language = this.languageSelector.value;
+                var newName = prompt("Please give a new name for the file, space is not allowed?");
+
+                if(newName && newName.length>0) {
+                    const code = this.editor.value.trim();
+                    if (!code) {
+                        this.showOutput('Please enter some code to execute.', 'error');
+                        return;
+                    }
+                    
+                    this.setLoading(true);
+                    this.statusText.textContent = 'Executing...';
+                    
+                    localStorage.setItem("CURRENT_LANGUAGE", this.languageSelector.value);
+
+                    try {
+                        const response = await fetch('/api/scripts/save', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                language: this.languageSelector.value,
+                                code: encodeURIComponent(code),
+                                filecode: newName.replace(/[^a-zA-Z0-9]/g, '_')
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            $("#scriptSelector").html(`<option value=''>Select Script</option>`+
+                                result.scripts.map(a=>`<option value='${a}'>${a}</option>`));
+
+                            this.statusText.textContent = 'Save successfull';
+                        } else {
+                            this.statusText.textContent = result.error;
+                        }
+                    } catch (error) {
+                        this.showOutput(`Network error: ${error.message}`, 'error');
+                        this.statusText.textContent = 'Network error';
+                    } finally {
+                        this.setLoading(false);
+                    }
+                }
+            }
+
+            async loadScriptCode() {
+                const language = this.languageSelector.value;
+                const fileCode = this.scriptSelector.value;
+
+                if(!language || !fileCode) return;
+
+                if(this.editor.value!=null && this.editor.value.length>0) {
+                    var a = confirm("This will remove the current code and replace with Selected Code, do you want to proceed?");
+                    if(!a) return;
+                }
+
+                try {
+                    const response = await fetch('/api/scripts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            language: language,
+                            filecode: fileCode
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.editor.value = result.code;
+                    } else {
+                        this.editor.value = "";
+                    }
+                } catch (error) {
+                    this.statusText.textContent = 'Network error for Language List';
+                } finally {
+                    $("#scriptSelector").val("");
+                    this.setLoading(false);
+                }
+            }
+            
+            async loadLangList() {
+                $("#languageSelector").html("");
+
+                try {
+                    const response = await fetch('/api/languages', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.LANGLIST = result;
+
+                        var a1 = $("#languageSelector").val();
+                        if(a1==null) {
+                            a1 = localStorage.getItem("CURRENT_LANGUAGE");
+                        }
+                        if(a1==null) {
+                            a1 = "javascript";
+                        }
+                        
+                        $("#languageSelector").html(result.languages.map(a=>`<option value='${a.id}'>${a.name}</option>`));
+
+                        $("#languageSelector").val(a1);
+                        this.setupBoilerplates();
+                        this.setupScripts();
+                        this.loadDefaultCode();
+                    }
+                } catch (error) {
+                    this.statusText.textContent = 'Network error for Language List';
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async executeCode() {
+                const code = this.editor.value.trim();
+                if (!code) {
+                    this.showOutput('Please enter some code to execute.', 'error');
+                    return;
+                }
+                
+                this.setLoading(true);
+                this.statusText.textContent = 'Executing...';
+                
+                localStorage.setItem("CURRENT_LANGUAGE", this.languageSelector.value);
+
+                try {
+                    const response = await fetch('/api/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            language: this.languageSelector.value,
+                            code: code,
+                            input: this.inputArea.value
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showOutput(result.output, 'success');
+                        this.statusText.textContent = 'Execution completed';
+                    } else {
+                        this.showOutput(result.error, 'error');
+                        this.statusText.textContent = 'Execution failed';
+                    }
+                    
+                    if (result.executionTime) {
+                        this.executionTime.textContent = `${result.executionTime}ms`;
+                    }
+                    
+                } catch (error) {
+                    this.showOutput(`Network error: ${error.message}`, 'error');
+                    this.statusText.textContent = 'Network error';
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+            
+            showOutput(text, type) {
+                this.outputArea.innerHTML = '';
+                this.outputArea.className = `output-area output-${type}`;
+                this.outputArea.textContent = text;
+            }
+            
+            setLoading(loading) {
+                this.runBtn.disabled = loading;
+                const runText = this.runBtn.querySelector('.run-text');
+                const loadingText = this.runBtn.querySelector('.loading');
+                
+                if (loading) {
+                    runText.style.display = 'none';
+                    loadingText.style.display = 'inline';
+                } else {
+                    runText.style.display = 'inline';
+                    loadingText.style.display = 'none';
+                }
+            }
+        }
+        
+        // Global functions for examples
+        function loadExample(type) {
+            document.getElementById('codeEditor').value = editor.getExampleCode(type);
+            editor.updateLineNumbers();
+        }
+        
+        // Initialize the editor
+        window.addEventListener('DOMContentLoaded', () => {
+            window.editor = new CodeEditor();
+        });
+    </script>
+</body>
+</html>
