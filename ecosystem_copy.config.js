@@ -1,7 +1,7 @@
 module.exports = {
   apps : [{
     name: 'myCoder',
-    script: 'index.js',
+    script: 'server.js',
     instances : '1',
     watch: "misc/*",
     max_memory_restart: '1024M',
