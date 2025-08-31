@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: 'RemoteCodeServer',
+    name: 'myCoder',
     script: 'index.js',
     instances : '1',
     watch: "misc/*",
