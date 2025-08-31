@@ -1,4 +1,4 @@
-# QuickCoder - Powerfull Sandboxed Code Editor on Fly
+# myCoder - Powerfull Sandboxed Code Editor on Fly
 
 A powerful web-based code editor with sandboxed execution environment supporting multiple programming languages.
 
