@@ -176,21 +176,25 @@ async function executeCode(language, code, input = '') {
    const config = LANGUAGES[language];
    
    if (!config) {
+        console.info('Unsupported language:', language);
        throw new Error(`Unsupported language: ${language}`);
    }
 
    // Validate code for dangerous patterns
    if (!validateCode(code)) {
+        console.info('Dangerous code detected:', code);
        throw new Error('Code contains potentially dangerous operations');
    }
 
    // Limit input size
    if (input.length > 1000) {
+        console.info('Input too large:', input.length);
        throw new Error('Input too large');
    }
 
    // Limit code size
    if (code.length > 50000) {
+        console.info('Code too large:', code.length);
        throw new Error('Code too large');
    }
 
